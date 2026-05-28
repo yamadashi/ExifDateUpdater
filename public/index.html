@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JPG Date Updater</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>JPG Date Updater</h1>
+      <p>JPEG ファイルをアップロードして、Exif とファイルタイムスタンプを更新します。</p>
+      <form action="/process" method="post" enctype="multipart/form-data">
+        <label>
+          画像ファイル (複数可):
+          <input type="file" name="files" accept=".jpg,.jpeg" multiple required />
+        </label>
+
+        <label>
+          日時:
+          <input type="datetime-local" id="datetimePicker" step="1" required />
+        </label>
+
+        <label>
+          出力ファイル名フォーマット:
+          <input type="text" name="filenameFormat" id="filenameFormat" value="[YYYY][MM][DD][HH][mm][ss]" />
+          <small>
+            利用可能な置換フォーマット: [YYYY], [MM], [DD], [HH], [mm], [ss], [SSS], [original]<br />
+            例: photo_[YYYY][MM][DD] → photo_20260525.jpg<br />
+            デフォルト: [YYYY][MM][DD][HH][mm][ss]
+          </small>
+        </label>
+
+        <label>
+          ダウンロードパスワード (任意):
+          <input type="password" name="password" placeholder="パスワードを設定する場合のみ入力" />
+          <small>同じバッチ内のすべてのファイルに対して同じパスワードが適用されます。</small>
+        </label>
+
+        <input type="hidden" name="datetime" id="datetime" />
+
+        <button type="submit">更新する</button>
+      </form>
+      <p class="note">処理完了後、ダウンロードリンクが表示されます。</p>
+    </main>
+    <script>
+      const form = document.querySelector("form");
+      const datetimePicker = document.getElementById("datetimePicker");
+      const datetimeInput = document.getElementById("datetime");
+
+      form.addEventListener("submit", () => {
+        const value = datetimePicker.value;
+        if (!value) return;
+        const milli = Math.floor(Math.random() * 1000)
+          .toString()
+          .padStart(3, "0");
+        datetimeInput.value = `${value}.${milli}`;
+      });
+    </script>
+  </body>
+</html>

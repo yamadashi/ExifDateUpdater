@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",       // Node で ESModule を扱う場合
+    "target": "ES2022",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*"]
+}
