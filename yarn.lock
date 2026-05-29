@@ -726,6 +726,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"exif-date-updater@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "exif-date-updater@workspace:."
+  dependencies:
+    "@types/express": "npm:^4.17.20"
+    "@types/formidable": "npm:^1.0.7"
+    "@types/node": "npm:^25.9.1"
+    "@types/yargs": "npm:^17.0.33"
+    dayjs: "npm:^1.11.18"
+    express: "npm:^4.18.4"
+    formidable: "npm:^3.5.4"
+    piexif-ts: "npm:^2.1.0"
+    typescript: "npm:^5.5.0"
+    utimes: "npm:^5.2.1"
+    yargs: "npm:^18.0.0"
+  languageName: unknown
+  linkType: soft
+
 "exponential-backoff@npm:^3.1.1":
   version: 3.1.2
   resolution: "exponential-backoff@npm:3.1.2"
@@ -2020,24 +2038,6 @@ __metadata:
   checksum: 10c0/193400255bd48968e5c5383730344fbb4fa114cdedfab26e329e50dd2d81b134244bb8a72c6ac1b10ab0281a58b363d06405632c9d49ca9dfd5e90cbd7d0f32c
   languageName: node
   linkType: hard
-
-"update-jpg-date@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "update-jpg-date@workspace:."
-  dependencies:
-    "@types/express": "npm:^4.17.20"
-    "@types/formidable": "npm:^1.0.7"
-    "@types/node": "npm:^25.9.1"
-    "@types/yargs": "npm:^17.0.33"
-    dayjs: "npm:^1.11.18"
-    express: "npm:^4.18.4"
-    formidable: "npm:^3.5.4"
-    piexif-ts: "npm:^2.1.0"
-    typescript: "npm:^5.5.0"
-    utimes: "npm:^5.2.1"
-    yargs: "npm:^18.0.0"
-  languageName: unknown
-  linkType: soft
 
 "util-deprecate@npm:^1.0.1":
   version: 1.0.2
