@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@components/*": ["./components/*"],
+      "@layouts/*": ["./layouts/*"],
+      "@pages/*": ["./pages/*"],
+      "@stores/*": ["./stores/*"],
+      "@services/*": ["./services/*"],
+      "@styles/*": ["./styles/*"],
+      "@utils/*": ["./utils/*"],
+      "@hooks/*": ["./hooks/*"]
+    },
+    "rootDir": "./",
+    "outDir": "../../public"
+  },
+  "include": ["./**/*"]
+}

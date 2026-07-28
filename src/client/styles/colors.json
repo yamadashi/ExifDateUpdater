@@ -1,0 +1,13 @@
+{
+  "primaryColor": "#0F6EB5",
+  "primaryHoverColor": "#1191DE",
+  "focusColor": "#0D4E94",
+  "primaryDisabledColor": "#79899D",
+  "secondaryActiveColor": "#E9F7FF",
+  "secondaryDisabledColor": "#E3E8ED",
+  "borderColor": "#C5CED8",
+  "defaultTextColor": "#03060E",
+  "brightestColor": "#FFFFFF",
+  "errorColor": "#C1272D",
+  "impactColor": "#E30000"
+}

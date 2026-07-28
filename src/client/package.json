@@ -1,0 +1,30 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.13.5",
+    "@emotion/react": "^11.14.0",
+    "@types/react-datepicker": "^7.0.0",
+    "axios": "^1.11.0",
+    "dayjs": "^1.11.18",
+    "react": "^18.2.0",
+    "react-datepicker": "^9.1.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.4.1",
+    "sanitize.css": "^13.0.0",
+    "zustand": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.0.0"
+  }
+}
