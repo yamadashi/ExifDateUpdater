@@ -17,9 +17,12 @@ import {
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const uploadRoot = path.join(__dirname, '..', 'uploads')
-const processedRoot = path.join(__dirname, '..', 'processed')
-const metaRoot = path.join(__dirname, '..', 'meta')
+const dataRoot = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, '..')
+const uploadRoot = path.join(dataRoot, 'uploads')
+const processedRoot = path.join(dataRoot, 'processed')
+const metaRoot = path.join(dataRoot, 'meta')
 
 fs.mkdirSync(uploadRoot, { recursive: true })
 fs.mkdirSync(processedRoot, { recursive: true })

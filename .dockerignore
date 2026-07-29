@@ -1,0 +1,10 @@
+.git
+.yarn
+node_modules
+dist
+uploads
+processed
+meta
+*.jpg
+src/client/*
+!src/client/package.json

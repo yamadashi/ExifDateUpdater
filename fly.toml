@@ -1,0 +1,30 @@
+# app name must be globally unique on Fly.io - change this before first deploy
+app = "exif-date-updater-api"
+primary_region = "nrt"
+
+[build]
+
+[env]
+  PORT = "8080"
+  DATA_DIR = "/data"
+  FILE_TTL_MINUTES = "30"
+  # Set this to the deployed client origin (e.g. https://xxxx.pages.dev)
+  # via `fly secrets set CLIENT_ORIGIN=https://xxxx.pages.dev` once known,
+  # or update this value directly.
+  CLIENT_ORIGIN = "http://localhost:3000"
+
+[[mounts]]
+  source = "exif_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

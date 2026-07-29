@@ -1,7 +1,12 @@
 import axios, { AxiosResponse } from 'axios'
 
+const baseURL = import.meta.env.VITE_API_BASE_URL
+if (!baseURL) {
+  throw new Error('VITE_API_BASE_URL is not set')
+}
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080',
+  baseURL,
   timeout: 60 * 1000,
 })
 
