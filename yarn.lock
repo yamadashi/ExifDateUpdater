@@ -5969,6 +5969,7 @@ __metadata:
     express: "npm:^4.18.4"
     formidable: "npm:^3.5.4"
     piexif-ts: "npm:^2.1.0"
+    typescript: "npm:^5.5.0"
     utimes: "npm:^5.2.1"
     vitest: "npm:^4.1.10"
     yargs: "npm:^18.0.0"
