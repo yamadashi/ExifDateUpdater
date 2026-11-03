@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 import Layout, { Content, Header } from '@layouts/Layout'
@@ -12,6 +12,16 @@ import Button from '@components/atoms/button/button.atom'
 import { createSlotComponent, getSlot } from '@utils/Slot'
 import { css } from '@emotion/react'
 import { submitUpload } from './bridge'
+
+const EXIF_TIMEZONE_OFFSET_STORAGE_KEY = 'upload.exifTimezoneOffset'
+const FILENAME_TIMEZONE_OFFSET_STORAGE_KEY = 'upload.filenameTimezoneOffset'
+const OUTPUT_FILENAME_FORMAT_STORAGE_KEY = 'upload.outputFilenameFormat'
+
+const readStoredOffset = (key: string): number => {
+  const stored = localStorage.getItem(key)
+  const parsed = stored === null ? NaN : Number(stored)
+  return Number.isFinite(parsed) ? parsed : 0
+}
 
 const Label = createSlotComponent()
 const Field = createSlotComponent()
@@ -74,11 +84,106 @@ const Upload: React.FC = () => {
   const [files, setFiles] = useState<FileList | null>(null)
   const [datetime, setDatetime] = useState('')
   const [outputFilenameFormat, setOutputFilenameFormat] = useState(
-    DEFAULT_OUTPUT_FILENAME_FORMAT,
+    () =>
+      localStorage.getItem(OUTPUT_FILENAME_FORMAT_STORAGE_KEY) ||
+      DEFAULT_OUTPUT_FILENAME_FORMAT,
   )
   const [password, setPassword] = useState('')
-  const [exifTimezoneOffset, setExifTimezoneOffset] = useState(0)
-  const [filenameTimezoneOffset, setFilenameTimezoneOffset] = useState(0)
+  const [exifTimezoneOffset, setExifTimezoneOffset] = useState(() =>
+    readStoredOffset(EXIF_TIMEZONE_OFFSET_STORAGE_KEY),
+  )
+  const [filenameTimezoneOffset, setFilenameTimezoneOffset] = useState(() =>
+    readStoredOffset(FILENAME_TIMEZONE_OFFSET_STORAGE_KEY),
+  )
+  const [fileOverrides, setFileOverrides] = useState<Map<File, string>>(
+    new Map(),
+  )
+
+  useEffect(() => {
+    localStorage.setItem(
+      OUTPUT_FILENAME_FORMAT_STORAGE_KEY,
+      outputFilenameFormat,
+    )
+  }, [outputFilenameFormat])
+
+  useEffect(() => {
+    localStorage.setItem(
+      EXIF_TIMEZONE_OFFSET_STORAGE_KEY,
+      String(exifTimezoneOffset),
+    )
+  }, [exifTimezoneOffset])
+
+  useEffect(() => {
+    localStorage.setItem(
+      FILENAME_TIMEZONE_OFFSET_STORAGE_KEY,
+      String(filenameTimezoneOffset),
+    )
+  }, [filenameTimezoneOffset])
+
+  const toggleFileOverride = (file: File) => {
+    setFileOverrides((prev) => {
+      const next = new Map(prev)
+      if (next.has(file)) {
+        next.delete(file)
+      } else {
+        next.set(file, datetime)
+      }
+      return next
+    })
+  }
+
+  const setFileOverrideValue = (file: File, value: string) => {
+    setFileOverrides((prev) => new Map(prev).set(file, value))
+  }
+
+  useEffect(() => {
+    const currentFiles = new Set(files ? Array.from(files) : [])
+    setFileOverrides((prev) => {
+      const next = new Map(
+        Array.from(prev).filter(([file]) => currentFiles.has(file)),
+      )
+      return next.size === prev.size ? prev : next
+    })
+  }, [files])
+
+  const renderFileExtra = (file: File) => {
+    const override = fileOverrides.get(file)
+    if (override === undefined) {
+      return (
+        <Button
+          theme="none"
+          size="NONE"
+          style={{ color: '#2379e7', textDecoration: 'underline' }}
+          onClick={() => toggleFileOverride(file)}
+        >
+          個別に日時を設定
+        </Button>
+      )
+    }
+    return (
+      <div
+        css={css({
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        })}
+      >
+        <DatetimeInput
+          value={override}
+          setValue={(v) => setFileOverrideValue(file, v)}
+          format={DEFAULT_DATE_FORMAT}
+        />
+        <Button
+          theme="none"
+          size="NONE"
+          style={{ color: '#666', textDecoration: 'underline' }}
+          onClick={() => toggleFileOverride(file)}
+        >
+          一括設定に戻す
+        </Button>
+      </div>
+    )
+  }
 
   const previewBase = useMemo(() => {
     if (!datetime || !dayjs(datetime, DEFAULT_DATE_FORMAT, true).isValid())
@@ -145,9 +250,18 @@ const Upload: React.FC = () => {
       setOutputFilenameFormat(DEFAULT_OUTPUT_FILENAME_FORMAT)
     }
 
+    // 各ファイルを固有のフィールド名 (file_<n>) で送り、
+    // 個別日時はそのフィールド名をキーにして紐付ける
     const formData = new FormData()
-    Array.from(files ?? []).forEach((file) => formData.append('files', file))
+    const fileDatetimes: Record<string, string> = {}
+    Array.from(files ?? []).forEach((file, i) => {
+      const key = `file_${i}`
+      formData.append(key, file)
+      const override = fileOverrides.get(file)
+      if (override) fileDatetimes[key] = override
+    })
     formData.append('datetime', datetime)
+    formData.append('fileDatetimes', JSON.stringify(fileDatetimes))
     formData.append(
       'filenameFormat',
       outputFilenameFormat.trim() === ''
@@ -198,6 +312,7 @@ const Upload: React.FC = () => {
                 multiple
                 required
                 accept=".jpg,.jpeg"
+                renderFileExtra={renderFileExtra}
               />
             </Field>
             {errors.files.hasError && <Error>{errors.files.message}</Error>}

@@ -10,12 +10,14 @@ const File = ({
   setFiles,
   readonly = false,
   onChange,
+  renderFileExtra,
   ...rest
 }: {
   files?: FileList | null
   setFiles?: (files: FileList | null) => void
   readonly?: boolean
   onChange?: (v: FileList | null) => void
+  renderFileExtra?: (file: File, index: number) => React.ReactNode
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const [previewSrc, setPreviewSrc] = useState<string | null>(null)
@@ -73,35 +75,45 @@ const File = ({
               style={{
                 minHeight: '50px',
                 display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
                 justifyContent: 'flex-start',
                 gap: 4,
               }}
             >
-              {isImage && src && (
-                <Image
-                  src={src}
-                  alt={file.name}
-                  fallback={<span>読み込み失敗</span>}
-                  style={{
-                    maxWidth: 120,
-                    maxHeight: 100,
-                    objectFit: 'contain',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setPreviewSrc(src)}
-                />
-              )}
-              <span>{file.name}</span>
-              {!readonly && (
-                <Icon
-                  path={mdiClose}
-                  size={0.8}
-                  onClick={() => handleRemove(i)}
-                  title="削除"
-                />
-              )}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                {isImage && src && (
+                  <Image
+                    src={src}
+                    alt={file.name}
+                    fallback={<span>読み込み失敗</span>}
+                    style={{
+                      maxWidth: 120,
+                      maxHeight: 100,
+                      objectFit: 'contain',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => setPreviewSrc(src)}
+                  />
+                )}
+                <span>{file.name}</span>
+                {!readonly && (
+                  <Icon
+                    path={mdiClose}
+                    size={0.8}
+                    onClick={() => handleRemove(i)}
+                    title="削除"
+                  />
+                )}
+              </div>
+              {!readonly && renderFileExtra?.(file, i)}
             </div>
           )
         })}

@@ -72,19 +72,14 @@ app.post('/process', async (req, res) => {
   try {
     const { fields, files } = await parseForm(req, form)
     const datetime = fields.datetime?.[0] ?? ''
+    const fileDatetimes = parseFileDatetimes(fields.fileDatetimes?.[0])
     const filenameFormat =
       fields.filenameFormat?.[0] ?? '[YYYY][MM][DD][HH][mm][ss]'
     const password = (fields.password?.[0] ?? '').trim()
     const exifTimezoneOffset = Number(fields.exifTimezoneOffset?.[0] ?? '0') || 0
     const filenameTimezoneOffset = Number(fields.filenameTimezoneOffset?.[0] ?? '0') || 0
-    const uploaded = files.files
-
-    if (!uploaded) {
-      return res.status(400).json({ error: 'No files uploaded.' })
-    }
-
-    const fileArray = uploaded
-    if (fileArray.length === 0) {
+    const fileEntries = collectUploadedFiles(files)
+    if (fileEntries.length === 0) {
       return res.status(400).json({ error: 'No files uploaded.' })
     }
 
@@ -93,13 +88,19 @@ app.post('/process', async (req, res) => {
     }
 
     const baseDate = new Date(datetime)
-    const exifDate = applyTimezoneOffset(baseDate, exifTimezoneOffset)
-    const filenameDate = applyTimezoneOffset(baseDate, filenameTimezoneOffset)
     const expiresAtMs = Date.now() + fileTtlMinutes * 60 * 1000
     const passwordHash = password ? hashPassword(password) : undefined
     await saveBatchMeta(metaRoot, batchId, { expiresAt: expiresAtMs, passwordHash })
 
-    for (const file of fileArray) {
+    for (const { key, file } of fileEntries) {
+      const override = fileDatetimes[key]
+      const fileBaseDate =
+        override && !Number.isNaN(new Date(override).getTime())
+          ? new Date(override)
+          : baseDate
+      const exifDate = applyTimezoneOffset(fileBaseDate, exifTimezoneOffset)
+      const filenameDate = applyTimezoneOffset(fileBaseDate, filenameTimezoneOffset)
+
       const inputPath = file.filepath
       const originalName = file.originalFilename ?? 'unknown.jpg'
       const outputName = formatFilename(filenameFormat, filenameDate, originalName)
@@ -186,6 +187,40 @@ app.post('/download/:batchId', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server listening on http://localhost:${port}`)
 })
+
+const UPLOADED_FILE_FIELD_PATTERN = /^file_(\d+)$/
+
+/**
+ * file_<n> という名前のフィールドで送られたファイルを、
+ * フィールド名 (キー) と組にして n の昇順で返す
+ */
+function collectUploadedFiles(
+  files: formidable.Files,
+): { key: string; file: formidable.File }[] {
+  return Object.entries(files)
+    .flatMap(([key, list]) => {
+      const match = UPLOADED_FILE_FIELD_PATTERN.exec(key)
+      if (!match || !list) return []
+      return list.map((file) => ({ key, file, order: Number(match[1]) }))
+    })
+    .sort((a, b) => a.order - b.order)
+    .map(({ key, file }) => ({ key, file }))
+}
+
+function parseFileDatetimes(raw: string | undefined): Record<string, string> {
+  if (!raw) return {}
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    return Object.fromEntries(
+      Object.entries(parsed).filter(
+        (entry): entry is [string, string] => typeof entry[1] === 'string',
+      ),
+    )
+  } catch {
+    return {}
+  }
+}
 
 function parseForm(
   req: express.Request,
